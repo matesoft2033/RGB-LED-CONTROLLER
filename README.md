@@ -1,112 +1,107 @@
-# Ultrasonic Distance Meter with LCD & Buzzer 🚀
-
-## 📌 Overview
-This project is an **Ultrasonic Distance Meter** that displays distance readings on an LCD screen and triggers a buzzer when an object comes too close. It uses an **HC-SR04 ultrasonic sensor**, a **16x2 LCD with I2C**, and a **passive buzzer** for alerts.
-
-![Project Image](WhatsApp%20Image%202025-03-21%20at%2020.06.47_77750526.jpg)
-
-## 🛠️ Components Used
-- **Arduino Board**
-- **HC-SR04 Ultrasonic Sensor**
-- **16x2 LCD with I2C Module**
-- **Passive Buzzer**
-- **Push Button**
-- **Jumper Wires**
-- **Breadboard**
-
-## 📜 Code
-```cpp
-#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-#define BUZZER_PIN 3
-#define BUTTON_PIN 11
-#define TRIG_PIN 9
-#define ECHO_PIN 10
-
-long T = 0;
-float S = 0;
-
-void buzzer_off() {
-  noTone(BUZZER_PIN);
-  delay(500);
-}
-
-void buzzer_on() {
-  tone(BUZZER_PIN, 1000);  
-  delay(500);        
-}
-
-void setup() {
-  Serial.begin(9600);
-  lcd.init();
-  lcd.backlight();
-
-  pinMode(BUZZER_PIN, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-  pinMode(TRIG_PIN, OUTPUT);
-  pinMode(ECHO_PIN, INPUT);
-}
-
-void loop() {
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(TRIG_PIN, LOW);
-
-  T = pulseIn(ECHO_PIN, HIGH);
-  S = (T * 0.0343) / 2;
-
-  if (S > 400 || S <= 0) {
-    S = 400;
-  }
-
-  int columnsToFill = map(S, 20, 400, 16, 0);
-  if (columnsToFill > 16) columnsToFill = 16;
-
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Distance: ");
-  lcd.print(S);
-  lcd.print("cm");
-
-  lcd.setCursor(0, 1);
-  for (int i = 0; i < columnsToFill; i++) {
-    lcd.print("\xFF");  // Full block character
-  }
-
-  if (S <= 15) {
-    buzzer_on();             
-  } 
-  else if (S >= 15){
-    buzzer_off();
-  }
-  while (digitalRead(11) == LOW){
-    buzzer_off();
-  }
-
-  Serial.print("Distance: ");
-  Serial.print(S);
-  Serial.println(" cm");
-
-  delay(1000);
-}
-```
-
-## 🔍 How It Works
-1. The **ultrasonic sensor** measures distance by sending a pulse and waiting for its echo.
-2. The **LCD** displays the measured distance.
-3. A **bar graph** is drawn on the LCD to visualize proximity.
-4. If the distance is **15 cm or less**, the **buzzer sounds an alert**.
-5. The **push button** stops the buzzer when pressed.
-
-## 🎯 Applications
-- **Obstacle detection** 🚧
-- **Parking assistance systems** 🚗
-- **Security distance monitoring** 🛡️
-
-## 📌 Future Improvements
-- Add a **relay module** to control external devices.
-- Implement **adjustable threshold values** via a potentiometer.
-- Display **custom warning messages** on the LCD.
-
-📢 Feel free to **contribute** or **modify** the project! 🛠️✨
+@@ -1,2 +1,105 @@
+ # RGB-LED-CONTROLLER
+ The RGB LED Controller is an interactive Arduino project that lets users customize LED colors and brightness using serial input. It allows precise control over individual LED color values and the number of LEDs activated, making it perfect for decorative lighting and DIY projects.
+ # 🎨 RGB LED Controller with Arduino
+ 
+ The **RGB LED Controller** is a fun and interactive Arduino project that lets users control RGB LED colors dynamically. By entering RGB values through the Serial Monitor, users can customize LED colors and adjust the number of LEDs that light up in real time.
+ 
+ ## 📸 Circuit Diagram
+ Here's the circuit setup for this project:
+ 
+ ![Circuit Diagram](RGB-LED-Controller.png)
+ 
+ ## 🔧 Features
+ ✅ **Customizable Colors**: Users can set any RGB color values between 0-255.  
+ ✅ **Adjustable LED Count**: Select the number of LEDs to turn on (1-12).  
+ ✅ **User-Friendly**: Simple serial input system for easy operation.  
+ 
+ ## 🛠 Components Used
+ - **Arduino Board** (e.g., Arduino Uno)
+ - **Adafruit NeoPixel RGB LED Strip** (or individual RGB LEDs)
+ - **Jumper Wires**
+ - **Power Supply** (for LEDs, if necessary)
+ 
+ ## 🚀 How It Works
+ 1. **Connect the Circuit**: Follow the provided circuit diagram.
+ 2. **Upload the Code**: Load the `rgb_led_controller.ino` file to your Arduino.
+ 3. **Interact via Serial Monitor**: Enter RGB values and the number of LEDs to illuminate.
+ 4. **Watch the LEDs Change**: Observe real-time LED color updates.
+ 
+ ## 📜 Code
+ ```cpp
+ #include <Adafruit_NeoPixel.h>
+ 
+ int num1, num2, num3, nums;
+ 
+ #define DELAY_TIME 100
+ #define PIN 2
+ #define NUMPIXELS 12
+ #define LOW_RGB 0
+ #define MAX_RGB 255
+ #define LOW_PIN 1
+ #define MAX_PIN 12
+ 
+ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+ 
+ void setup() {
+   Serial.begin(9600);
+   pixels.begin();
+ }
+ 
+ void loop() {
+   Serial.print("Pick 1st color value (0-255): ");
+   while (Serial.available() == 0) { delay(DELAY_TIME); }
+   num1 = Serial.parseInt();
+   if (num1 < LOW_RGB || num1 > MAX_RGB) {
+     Serial.println("Invalid! Enter a value between 0-255.");
+     return;
+   }
+   Serial.println(num1);
+ 
+   Serial.print("Pick 2nd color value (0-255): ");
+   while (Serial.available() == 0) { delay(DELAY_TIME); }
+   num2 = Serial.parseInt();
+   if (num2 < LOW_RGB || num2 > MAX_RGB) {
+     Serial.println("Invalid! Enter a value between 0-255.");
+     return;
+   }
+   Serial.println(num2);
+ 
+   Serial.print("Pick 3rd color value (0-255): ");
+   while (Serial.available() == 0) { delay(DELAY_TIME); }
+   num3 = Serial.parseInt();
+   if (num3 < LOW_RGB || num3 > MAX_RGB) {
+     Serial.println("Invalid! Enter a value between 0-255.");
+     return;
+   }
+   Serial.println(num3);
+ 
+   pixels.clear();
+   pixels.setPixelColor(0, num1, num2, num3);
+   pixels.show();
+   delay(DELAY_TIME);
+ 
+   Serial.print("Pick amount of LEDs to turn on (1-12): ");
+   while (Serial.available() == 0) { delay(DELAY_TIME); }
+   nums = Serial.parseInt();
+   if (nums < LOW_PIN || nums > MAX_PIN) {
+     Serial.println("Invalid! Enter a value between 1-12.");
+     return;
+   }
+   Serial.println(nums);
+ 
+   pixels.clear();
+   for (int j = 0; j < nums; j++) {
+     pixels.setPixelColor(j, num1, num2, num3);
+   }
+   pixels.show();
+   delay(DELAY_TIME);
+ }
+ ```
+ 
+ ## 📢 Notes
+ - Ensure the **Adafruit NeoPixel library** is installed before uploading the code.
+ - Use the **Serial Monitor** (baud rate: 9600) to input RGB values and LED count.
+ - If the LEDs do not light up, check the **connections and power supply**.
+ 
+ Enjoy customizing your LEDs! 🌈
